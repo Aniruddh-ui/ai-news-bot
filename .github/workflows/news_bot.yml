@@ -1,25 +1,22 @@
 name: Daily AI News Bot
 
 on:
-  push:                     # ✅ Triggers the workflow on push to main
-    branches:
-      - main
   schedule:
-    - cron: '30 3 * * *'    # ✅ Daily 9:00 AM IST (UTC 3:30)
-  workflow_dispatch:        # ✅ Allows manual run from GitHub UI
+    - cron: '0 4 * * *'  # Runs daily at 9:30 AM IST (UTC+5:30)
+  workflow_dispatch:      # Allows manual trigger
 
 jobs:
   run-news-bot:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: 3.10
 
       - name: Install dependencies
         run: |
@@ -28,11 +25,11 @@ jobs:
 
       - name: Run news bot
         env:
-          TWILIO_SID: ${{ secrets.TWILIO_SID }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
           TWILIO_AUTH: ${{ secrets.TWILIO_AUTH }}
           TWILIO_PHONE: ${{ secrets.TWILIO_PHONE }}
           USER_PHONE: ${{ secrets.USER_PHONE }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
-          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}  # Only if you use LLM
         run: |
           python app.py
