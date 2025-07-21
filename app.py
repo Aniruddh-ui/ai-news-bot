@@ -15,10 +15,11 @@ def send_long_whatsapp_message(body, header=""):
     """
     Sends a long WhatsApp message by splitting it into parts of ≤1500 characters.
     """
-    account_sid = os.getenv("TWILIO_ACCOUNT_SID")  # <-- updated
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN")  # ✅ Use correct key
     from_number = os.getenv("TWILIO_PHONE")
     to_number = os.getenv("USER_PHONE")
+    llm_api_key = os.getenv("LLM_API_KEY")
 
     if not all([account_sid, auth_token, from_number, to_number]):
         raise EnvironmentError("Missing required Twilio environment variables.")
