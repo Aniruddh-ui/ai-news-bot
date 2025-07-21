@@ -1,9 +1,12 @@
 name: Daily AI News Bot
 
 on:
+  push:                     # ✅ Triggers the workflow on push to main
+    branches:
+      - main
   schedule:
-    - cron: '30 3 * * *'  # Runs at 9:00 AM IST (UTC+5:30 → UTC 3:30)
-  workflow_dispatch:      # Manual trigger option
+    - cron: '30 3 * * *'    # ✅ Daily 9:00 AM IST (UTC 3:30)
+  workflow_dispatch:        # ✅ Allows manual run from GitHub UI
 
 jobs:
   run-news-bot:
