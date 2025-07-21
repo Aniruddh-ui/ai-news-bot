@@ -2,26 +2,31 @@ from agents.news_fetcher import fetch_news
 from agents.summarizer import summarize_news
 from agents.messenger import send_whatsapp_message
 from dotenv import load_dotenv
+from twilio.rest import Client
 import schedule
 import time
 import os
-from twilio.rest import Client
 
-load_dotenv()
+# Load .env file only if running locally
+if os.getenv("GITHUB_ACTIONS") != "true":
+    load_dotenv()
 
 def send_long_whatsapp_message(body, header=""):
     """
     Sends a long WhatsApp message by splitting it into parts of ≤1500 characters.
     """
-    account_sid = os.getenv("TWILIO_SID")
-    auth_token = os.getenv("TWILIO_AUTH")
+    account_sid = os.getenv("TWILIO_ACCOUNT_SID")  # <-- updated
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
     from_number = os.getenv("TWILIO_PHONE")
     to_number = os.getenv("USER_PHONE")
+
+    if not all([account_sid, auth_token, from_number, to_number]):
+        raise EnvironmentError("Missing required Twilio environment variables.")
 
     client = Client(account_sid, auth_token)
 
     chunk_size = 1500
-    chunks = [body[i:i+chunk_size] for i in range(0, len(body), chunk_size)]
+    chunks = [body[i:i + chunk_size] for i in range(0, len(body), chunk_size)]
 
     for i, chunk in enumerate(chunks):
         prefix = f"{header} (Part {i+1}/{len(chunks)})\n\n" if len(chunks) > 1 else f"{header}\n\n"
@@ -43,15 +48,14 @@ def run_daily_news_bot():
     print("[+] Sending to WhatsApp...")
     send_whatsapp_message("📰 *Top AI/Tech News Today:*\n\n" + news)
     send_long_whatsapp_message(summary, header="🤖 *LLM Summary:*")
-
     print("[+] All messages sent.")
 
 if __name__ == "__main__":
     run_daily_news_bot()
 
-schedule.every().day.at("03:30").do(run_daily_news_bot)  # 3:30 UTC = 9:00 IST
-
-
-while True:
-    schedule.run_pending()
-    time.sleep(60)
+    # Schedule for local testing only (skipped during GitHub Actions)
+    if os.getenv("GITHUB_ACTIONS") != "true":
+        schedule.every().day.at("03:30").do(run_daily_news_bot)  # 3:30 UTC = 9:00 IST
+        while True:
+            schedule.run_pending()
+            time.sleep(60)
